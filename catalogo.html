@@ -243,12 +243,17 @@
   }
 
   // ---------- catálogo ----------
+  // orden: lo más vendido primero (rank viene calculado desde el historial de ventas)
+  function byRank(a, b){
+    var ra = +a.rank || 1e9, rb = +b.rank || 1e9;
+    return ra !== rb ? ra - rb : a.name.localeCompare(b.name, 'es', {sensitivity:'base'});
+  }
   function groups(list){
     var by = {}; list.forEach(function(p){ (by[p.category] = by[p.category] || []).push(p); });
     var keys = data.categories.map(function(c){ return c.key; });
     Object.keys(by).forEach(function(k){ if (keys.indexOf(k) === -1) keys.push(k); });
     return keys.filter(function(k){ return by[k]; }).map(function(k){
-      return { key: k, label: catLabel(k), items: by[k].sort(function(a, b){ return a.name.localeCompare(b.name, 'es', {sensitivity:'base'}); }) };
+      return { key: k, label: catLabel(k), items: by[k].sort(byRank) };
     });
   }
   function controlsHtml(p){
@@ -268,7 +273,10 @@
     if (!list.length){
       $('list').innerHTML = '<div class="empty">' + (q ? 'No encontramos "' + esc(term) + '" entre los productos disponibles.' : 'Por ahora no hay productos disponibles.') + '</div>';
     } else {
-      $('list').innerHTML = groups(list).map(function(g){
+      var secs = (q || cat === 'todos')
+        ? [{ label: q ? 'Resultados' : 'Los más pedidos primero', items: list.slice().sort(byRank) }]
+        : groups(list);
+      $('list').innerHTML = secs.map(function(g){
         return '<section class="sec"><h2>' + esc(g.label) + '<span>' + g.items.length + '</span></h2><div class="grid">' +
           g.items.map(function(p){
             return '<div class="card' + (hasPromo(p) ? ' promo' : '') + (cart[p.id] ? ' incart' : '') + '">' +
