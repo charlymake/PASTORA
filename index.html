@@ -1495,6 +1495,29 @@
     .inv-delete-btn{width:32px;height:32px;}
     .tab{padding:10px 14px;}
   }
+  /* ---------- catálogo para clientes ---------- */
+  .catalogo-panel{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;background:var(--surface-0);width:100%;overflow:auto;}
+  .cat-hero{padding:18px 20px 6px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .cat-hero h1{margin:0;font-family:'Manrope',sans-serif;font-size:22px;font-weight:800;color:var(--green-700);letter-spacing:.02em;}
+  .cat-hero .cat-sub{font-family:'Roboto',sans-serif;font-size:13px;color:var(--ink-600);margin-top:2px;}
+  .cat-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .cat-toolbar{padding:8px 20px 4px;display:flex;flex-direction:column;gap:8px;position:sticky;top:0;background:var(--surface-0);z-index:2;border-bottom:1px solid var(--line);}
+  .cat-toolbar .inventory-search{width:100%;max-width:420px;flex:0 0 auto;height:auto;min-height:0;}
+  .cat-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;}
+  .cat-chip{flex:0 0 auto;border:1px solid var(--line-strong);background:var(--surface-0);color:var(--ink-600);border-radius:999px;padding:6px 14px;font-family:'Manrope',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;}
+  .cat-chip.active{background:var(--green-600);border-color:var(--green-600);color:#fff;}
+  .cat-body{padding:6px 20px 28px;}
+  .cat-section h2{font-family:'Manrope',sans-serif;font-size:14px;font-weight:800;letter-spacing:.06em;color:var(--ink-900);margin:18px 0 10px;display:flex;align-items:center;gap:8px;}
+  .cat-section h2 .cat-n{font-weight:600;font-size:12px;color:var(--ink-400);letter-spacing:0;}
+  .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;}
+  .cat-card{border:1px solid var(--line);border-radius:12px;padding:12px 12px 10px;background:var(--surface-2);display:block;}
+  .cat-card .cc-name{display:block;font-family:'Roboto',sans-serif;font-size:13.5px;font-weight:600;color:var(--ink-900);line-height:1.25;word-break:break-word;}
+  .cat-card .cc-price{display:block;margin-top:6px;font-family:'Manrope',sans-serif;font-size:18px;font-weight:800;color:var(--green-700);}
+  .cat-card .cc-price small{font-size:12px;font-weight:700;color:var(--ink-600);}
+  .cat-card.has-promo{border-color:#f0c97a;background:#fffaf0;}
+  .cat-empty{padding:40px 0;text-align:center;color:var(--ink-400);font-family:'Roboto',sans-serif;}
+  .cat-foot{font-family:'Roboto',sans-serif;font-size:11.5px;color:var(--ink-400);margin-top:22px;}
+  @media (max-width:720px){ .cat-grid{grid-template-columns:repeat(2,minmax(0,1fr));} .cat-hero h1{font-size:19px;} }
 </style>
 
 <div class="page-eyebrow"><span class="dot"></span> <b>LILO</b> &nbsp;·&nbsp; réplica de interfaz &nbsp;·&nbsp; prototipo funcional</div>
@@ -1556,6 +1579,7 @@
 
     <div class="hamburger-menu hidden" id="hamburgerMenu">
       <button type="button" class="hb-item active" data-module="venta">🛒 Venta</button>
+      <button type="button" class="hb-item" data-module="catalogo">📖 Catálogo</button>
       <button type="button" class="hb-item" data-module="inventario">📦 Inventario</button>
       <button type="button" class="hb-item" data-module="auditoria">🧮 Auditoría inventario</button>
       <button type="button" class="hb-item" data-module="compras">🛍️ Compras</button>
@@ -1657,6 +1681,29 @@
         <div class="inventory-cols"><span>Producto</span><span>Categoría</span><span>Costo</span><span>Precio</span><span>Margen</span><span>Existencias</span><span>Unidad</span><span>Caduca</span><span></span></div>
         <div id="inventoryRows"></div>
       </div>
+    </div>
+  </section>
+
+  <section class="workspace hidden" id="workspaceCatalogo">
+    <div class="catalogo-panel">
+      <div class="cat-hero">
+        <div>
+          <h1 id="catalogoTitle">CATÁLOGO</h1>
+          <div class="cat-sub" id="catalogoSub"></div>
+        </div>
+        <div class="cat-actions">
+          <button type="button" class="btn-backup" id="btnCatalogoShare">💬 Compartir lista</button>
+          <button type="button" class="btn-backup" id="btnCatalogoPrint">🖨️ Imprimir / PDF</button>
+        </div>
+      </div>
+      <div class="cat-toolbar">
+        <div class="inventory-search">
+          <input type="text" id="catalogoSearch" placeholder="Buscar producto..." />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div class="cat-chips" id="catalogoChips"></div>
+      </div>
+      <div class="cat-body" id="catalogoBody"></div>
     </div>
   </section>
 
@@ -2311,8 +2358,8 @@ if(xr(e,"index.xml"))throw new Error("Unsupported NUMBERS 09 file");throw new Er
 
   // qué módulos del menú puede ver cada tipo de perfil (siempre puede "salir")
   var MODULES_BY_TYPE = {
-    cajero: ['venta', 'salir'],
-    admin:  ['inventario', 'auditoria', 'compras', 'merma', 'proveedores', 'estadisticas', 'historial', 'usuarios', 'configuracion', 'salir']
+    cajero: ['venta', 'catalogo', 'salir'],
+    admin:  ['catalogo', 'inventario', 'auditoria', 'compras', 'merma', 'proveedores', 'estadisticas', 'historial', 'usuarios', 'configuracion', 'salir']
   };
   var currentUser = null;
   var pendingLoginUser = null; // usuario esperando a que se confirme su contraseña para entrar
@@ -2561,6 +2608,7 @@ if(xr(e,"index.xml"))throw new Error("Unsupported NUMBERS 09 file");throw new Er
   var workspaceVenta       = document.getElementById('workspaceVenta');
   var workspaceInventario  = document.getElementById('workspaceInventario');
   var workspaceAuditoria   = document.getElementById('workspaceAuditoria');
+  var workspaceCatalogo    = document.getElementById('workspaceCatalogo');
   var workspaceEstadisticas = document.getElementById('workspaceEstadisticas');
   var workspaceProveedores = document.getElementById('workspaceProveedores');
   var workspaceUsuarios   = document.getElementById('workspaceUsuarios');
@@ -2713,6 +2761,7 @@ if(xr(e,"index.xml"))throw new Error("Unsupported NUMBERS 09 file");throw new Er
     workspaceVenta.classList.add('hidden');
     workspaceInventario.classList.add('hidden');
     workspaceAuditoria.classList.add('hidden');
+    workspaceCatalogo.classList.add('hidden');
     workspaceEstadisticas.classList.add('hidden');
     workspaceProveedores.classList.add('hidden');
     workspaceCompras.classList.add('hidden');
@@ -2725,6 +2774,9 @@ if(xr(e,"index.xml"))throw new Error("Unsupported NUMBERS 09 file");throw new Er
     } else if (mod === 'inventario'){
       renderInventory();
       workspaceInventario.classList.remove('hidden');
+    } else if (mod === 'catalogo'){
+      renderCustomerCatalog();
+      workspaceCatalogo.classList.remove('hidden');
     } else if (mod === 'auditoria'){
       renderAuditoria();
       workspaceAuditoria.classList.remove('hidden');
@@ -4493,6 +4545,123 @@ if(xr(e,"index.xml"))throw new Error("Unsupported NUMBERS 09 file");throw new Er
     saveState();
   });
 
+  // ---------- catálogo para clientes (solo productos con existencias; sin costos ni existencias) ----------
+  var CATALOGO_NEGOCIO = 'La Pastora';
+  var catalogoCategory = 'todos';
+  var catalogoSearchTerm = '';
+  function catalogoEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function catalogoMoney(n){ return '$' + (+n || 0).toFixed(2).replace(/\.00$/, ''); }
+  function catalogoAvailable(){
+    return CATALOG.filter(function(p){ return p && (+p.stock || 0) > 0 && (+p.price || 0) > 0 && !(isKgProduct(p) && (+p.stock || 0) < 0.25); });
+  }
+  // agrupa por categoría en el orden de Configuración; dentro de cada una, alfabético
+  function catalogoGroups(list){
+    var byCat = {};
+    list.forEach(function(p){ (byCat[p.category] = byCat[p.category] || []).push(p); });
+    var keys = CATEGORIES.map(function(c){ return c.key; });
+    Object.keys(byCat).forEach(function(k){ if (keys.indexOf(k) === -1) keys.push(k); });
+    return keys.filter(function(k){ return byCat[k] && byCat[k].length; }).map(function(k){
+      return { key: k, label: categoryLabel(k) || 'Otros', items: byCat[k].sort(function(a, b){ return a.name.localeCompare(b.name, 'es', {sensitivity:'base'}); }) };
+    });
+  }
+  function catalogoPriceHtml(p){
+    return catalogoMoney(p.price) + (isKgProduct(p) ? ' <small>/kg</small>' : '');
+  }
+  function catalogoFechaHoy(){
+    try { return new Date().toLocaleDateString('es-MX', {day:'numeric', month:'long', year:'numeric'}); } catch(e){ return ''; }
+  }
+  function renderCustomerCatalog(){
+    var all = catalogoAvailable();
+    if (catalogoCategory !== 'todos' && !all.some(function(p){ return p.category === catalogoCategory; })) catalogoCategory = 'todos';
+    document.getElementById('catalogoTitle').textContent = 'CATÁLOGO ' + CATALOGO_NEGOCIO.toUpperCase();
+    document.getElementById('catalogoSub').textContent = all.length + ' productos disponibles · precios al ' + catalogoFechaHoy();
+
+    var groupsAll = catalogoGroups(all);
+    var chips = [{key:'todos', label:'Todos', n: all.length}].concat(groupsAll.map(function(g){ return {key:g.key, label:g.label, n:g.items.length}; }));
+    document.getElementById('catalogoChips').innerHTML = chips.map(function(c){
+      return '<button type="button" class="cat-chip' + (c.key === catalogoCategory ? ' active' : '') + '" data-cat="' + catalogoEsc(c.key) + '">' + catalogoEsc(c.label) + ' (' + c.n + ')</button>';
+    }).join('');
+
+    var q = normalize(catalogoSearchTerm);
+    var list = all.filter(function(p){
+      if (q) return normalize(p.name).indexOf(q) !== -1;
+      return catalogoCategory === 'todos' || p.category === catalogoCategory;
+    });
+    var body = document.getElementById('catalogoBody');
+    if (!list.length){
+      body.innerHTML = '<div class="cat-empty">' + (q ? 'No hay productos disponibles con "' + catalogoEsc(catalogoSearchTerm) + '".' : 'No hay productos con existencias en este momento.') + '</div>';
+      return;
+    }
+    body.innerHTML = catalogoGroups(list).map(function(g){
+      return '<div class="cat-section"><h2>' + catalogoEsc(g.label) + ' <span class="cat-n">' + g.items.length + '</span></h2><div class="cat-grid">' +
+        g.items.map(function(p){
+          var promo = hasPromo(p);
+          return '<div class="cat-card' + (promo ? ' has-promo' : '') + '">' +
+            '<span class="cc-name">' + catalogoEsc(p.name) + '</span>' +
+            '<span class="cc-price">' + catalogoPriceHtml(p) + '</span>' +
+            (promo ? '<span class="promo-badge">Oferta ' + catalogoEsc(promoLabel(p)) + '</span>' : '') +
+          '</div>';
+        }).join('') + '</div></div>';
+    }).join('') + '<div class="cat-foot">Precios sujetos a cambio y a disponibilidad.</div>';
+  }
+  // texto para mandar por WhatsApp (lo que está filtrado en pantalla)
+  function catalogoShareText(){
+    var all = catalogoAvailable();
+    var q = normalize(catalogoSearchTerm);
+    var list = all.filter(function(p){ return q ? normalize(p.name).indexOf(q) !== -1 : (catalogoCategory === 'todos' || p.category === catalogoCategory); });
+    var lines = ['*Catálogo ' + CATALOGO_NEGOCIO + '*', 'Precios al ' + catalogoFechaHoy(), ''];
+    catalogoGroups(list).forEach(function(g){
+      lines.push('*' + g.label + '*');
+      g.items.forEach(function(p){
+        lines.push('• ' + p.name + ' — ' + catalogoMoney(p.price) + (isKgProduct(p) ? '/kg' : '') + (hasPromo(p) ? ' (oferta ' + promoLabel(p) + ')' : ''));
+      });
+      lines.push('');
+    });
+    lines.push('Precios sujetos a cambio y a disponibilidad.');
+    return lines.join('\n');
+  }
+  function catalogoPrint(){
+    var groups = catalogoGroups(catalogoAvailable());
+    var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Catálogo ' + catalogoEsc(CATALOGO_NEGOCIO) + '</title><style>' +
+      'body{font-family:Roboto,Arial,sans-serif;color:#20241D;margin:24px;}h1{margin:0;color:#4F7A2A;font-size:24px;}' +
+      '.sub{color:#5B6156;font-size:12px;margin:2px 0 14px;}h2{font-size:13px;letter-spacing:.06em;margin:16px 0 6px;padding-bottom:4px;border-bottom:2px solid #7FB44A;}' +
+      '.cols{columns:2;column-gap:28px;}.sec{break-inside:avoid-column;}' +
+      '.row{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:3px 0;border-bottom:1px dotted #C6CDBB;break-inside:avoid;}' +
+      '.row b{white-space:nowrap;}.of{color:#8a5a00;font-weight:700;font-size:10.5px;}.foot{margin-top:16px;font-size:10px;color:#8B9184;}' +
+      '@page{margin:14mm;}</style></head><body>' +
+      '<h1>Catálogo ' + catalogoEsc(CATALOGO_NEGOCIO) + '</h1><div class="sub">Precios al ' + catalogoFechaHoy() + '</div><div class="cols">' +
+      groups.map(function(g){
+        return '<div class="sec"><h2>' + catalogoEsc(g.label.toUpperCase()) + '</h2>' + g.items.map(function(p){
+          return '<div class="row"><span>' + catalogoEsc(p.name) + (hasPromo(p) ? ' <span class="of">Oferta ' + catalogoEsc(promoLabel(p)) + '</span>' : '') + '</span><b>' + catalogoMoney(p.price) + (isKgProduct(p) ? '/kg' : '') + '</b></div>';
+        }).join('') + '</div>';
+      }).join('') + '</div><div class="foot">Precios sujetos a cambio y a disponibilidad.</div></body></html>';
+    var w = window.open('', '_blank');
+    if (!w){ alert('El navegador bloqueó la ventana de impresión. Permite ventanas emergentes para esta página e inténtalo de nuevo.'); return; }
+    w.document.open(); w.document.write(html); w.document.close();
+    setTimeout(function(){ try { w.focus(); w.print(); } catch(e){} }, 300);
+  }
+  (function initCatalogo(){
+    var chipsEl = document.getElementById('catalogoChips');
+    var searchEl = document.getElementById('catalogoSearch');
+    chipsEl.addEventListener('click', function(e){
+      var chip = e.target.closest('.cat-chip');
+      if (!chip) return;
+      catalogoCategory = chip.getAttribute('data-cat');
+      catalogoSearchTerm = ''; searchEl.value = '';
+      renderCustomerCatalog();
+    });
+    searchEl.addEventListener('input', function(){ catalogoSearchTerm = searchEl.value; renderCustomerCatalog(); });
+    document.getElementById('btnCatalogoPrint').addEventListener('click', catalogoPrint);
+    document.getElementById('btnCatalogoShare').addEventListener('click', function(){
+      var text = catalogoShareText();
+      if (navigator.share){
+        navigator.share({ title: 'Catálogo ' + CATALOGO_NEGOCIO, text: text }).catch(function(){});
+      } else {
+        window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+      }
+    });
+  })();
+
   function normalize(s){
     return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
   }
@@ -5378,6 +5547,7 @@ if(xr(e,"index.xml"))throw new Error("Unsupported NUMBERS 09 file");throw new Er
     updateCashRegisterBtn();
     if (!workspaceInventario.classList.contains('hidden')) renderInventory();
     if (!workspaceAuditoria.classList.contains('hidden')) renderAuditoria();
+    if (!workspaceCatalogo.classList.contains('hidden')) renderCustomerCatalog();
     if (!workspaceEstadisticas.classList.contains('hidden')) renderStats();
     if (!workspaceProveedores.classList.contains('hidden')) renderSuppliers();
     if (!workspaceCompras.classList.contains('hidden')) renderPurchases();
@@ -5500,6 +5670,7 @@ if(xr(e,"index.xml"))throw new Error("Unsupported NUMBERS 09 file");throw new Er
     // si el módulo visible en este momento tiene su propia tabla, refréscala también
     if (!workspaceInventario.classList.contains('hidden')) renderInventory();
     if (!workspaceAuditoria.classList.contains('hidden')) renderAuditoria();
+    if (!workspaceCatalogo.classList.contains('hidden')) renderCustomerCatalog();
     if (!workspaceEstadisticas.classList.contains('hidden')) renderStats();
     if (!workspaceProveedores.classList.contains('hidden')) renderSuppliers();
     if (!workspaceCompras.classList.contains('hidden')) renderPurchases();
