@@ -87,6 +87,13 @@
   .send{margin-top:16px;width:100%;border:0;border-radius:14px;background:#25D366;color:#fff;padding:15px;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;}
   .send svg{width:22px;height:22px;}
   .err{color:var(--red);font-size:13px;margin-top:8px;min-height:1em;}
+  .gps{margin-top:8px;width:100%;border:1px solid var(--g6);background:var(--g1);color:var(--g7);border-radius:10px;padding:11px;font-weight:700;font-size:14.5px;}
+  .gps:disabled{opacity:.6;}
+  .gps-ok{display:none;margin-top:8px;padding:10px 12px;border-radius:10px;background:var(--g1);color:var(--g7);font-size:13.5px;font-weight:600;align-items:center;justify-content:space-between;gap:8px;}
+  .gps-ok.on{display:flex;}
+  .gps-ok a{color:var(--g7);}
+  .gps-ok button{border:0;background:transparent;color:var(--ink6);text-decoration:underline;font-size:12.5px;}
+  .gps-msg{font-size:12.5px;color:var(--ink6);margin-top:6px;}
   .clear{border:0;background:transparent;color:var(--ink4);font-size:13px;text-decoration:underline;margin-top:10px;width:100%;}
 
   .kg-bg{position:fixed;inset:0;background:rgba(32,36,29,.45);z-index:40;display:flex;align-items:center;justify-content:center;padding:18px;}
@@ -148,8 +155,12 @@
       <button type="button" data-mode="domicilio">🛵 A domicilio</button>
     </div>
     <div id="addrBox" style="display:none;">
-      <label class="f" for="fAddr">Dirección de entrega</label>
-      <textarea class="f-in" id="fAddr" autocomplete="street-address" placeholder="Calle, número, colonia y alguna referencia"></textarea>
+      <label class="f">Ubicación de entrega</label>
+      <button type="button" class="gps" id="gpsBtn">📍 Usar mi ubicación actual</button>
+      <div class="gps-ok" id="gpsOk"><span>✓ Ubicación agregada · <a id="gpsLink" href="#" target="_blank" rel="noopener">ver en mapa</a></span><button type="button" id="gpsClear">Quitar</button></div>
+      <div class="gps-msg" id="gpsMsg"></div>
+      <label class="f" for="fAddr">Dirección o referencias</label>
+      <textarea class="f-in" id="fAddr" autocomplete="street-address" placeholder="Calle, número, colonia, color de la casa, entre qué calles…"></textarea>
     </div>
 
     <label class="f" for="fNote">Notas (opcional)</label>
@@ -191,6 +202,7 @@
   var byId = {};
   var cart = {};       // id -> cantidad (piezas o kilos)
   var cat = 'todos', term = '', mode = 'recoger', kgTarget = null, kgChoice = null;
+  var gps = null; // {lat, lng, acc}
 
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -347,15 +359,42 @@
     items.forEach(function(it){ L.push('• ' + qtyLabel(it.p, it.q) + ' — ' + it.p.name + ' (' + money(lineTotal(it.p, it.q)) + ')'); });
     L.push('', '*Total aproximado: ' + money(cartTotal()) + '*', '');
     L.push('Nombre: ' + name);
-    L.push(mode === 'domicilio' ? ('Entrega a domicilio: ' + addr) : 'Paso a recoger a la tienda');
+    if (mode === 'domicilio'){
+      L.push('Entrega a domicilio' + (addr ? ': ' + addr : ''));
+      if (gps) L.push('📍 Ubicación: ' + mapsUrl(gps));
+    } else L.push('Paso a recoger a la tienda');
     if (note) L.push('Notas: ' + note);
     return L.join('\n');
   }
+  function mapsUrl(g){ return 'https://maps.google.com/?q=' + g.lat.toFixed(6) + ',' + g.lng.toFixed(6); }
+  function paintGps(){
+    $('gpsOk').classList.toggle('on', !!gps);
+    $('gpsBtn').style.display = gps ? 'none' : '';
+    if (gps) $('gpsLink').href = mapsUrl(gps);
+  }
+  function getGps(){
+    var msg = $('gpsMsg');
+    if (!navigator.geolocation){ msg.textContent = 'Tu navegador no permite compartir ubicación. Escribe tu dirección abajo.'; return; }
+    $('gpsBtn').disabled = true; $('gpsBtn').textContent = 'Buscando tu ubicación…'; msg.textContent = '';
+    navigator.geolocation.getCurrentPosition(function(pos){
+      gps = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
+      $('gpsBtn').disabled = false; $('gpsBtn').textContent = '📍 Usar mi ubicación actual';
+      msg.textContent = gps.acc > 150 ? 'La ubicación es aproximada (unos ' + Math.round(gps.acc) + ' m). Agrega referencias abajo para encontrarte fácil.' : 'Agrega alguna referencia abajo (color de casa, número) para encontrarte más rápido.';
+      $('err').textContent = '';
+      paintGps();
+    }, function(e){
+      $('gpsBtn').disabled = false; $('gpsBtn').textContent = '📍 Usar mi ubicación actual';
+      msg.textContent = e.code === 1
+        ? 'No diste permiso de ubicación. Actívalo en el candado/ajustes del navegador, o escribe tu dirección abajo.'
+        : 'No pudimos obtener tu ubicación. Revisa que el GPS esté encendido o escribe tu dirección abajo.';
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+  }
+
   function send(){
     $('err').textContent = '';
     if (!cartItems().length) return;
     if (!$('fName').value.trim()){ $('err').textContent = 'Escribe tu nombre para enviar el pedido.'; $('fName').focus(); return; }
-    if (mode === 'domicilio' && !$('fAddr').value.trim()){ $('err').textContent = 'Escribe la dirección de entrega.'; $('fAddr').focus(); return; }
+    if (mode === 'domicilio' && !gps && !$('fAddr').value.trim()){ $('err').textContent = 'Agrega tu ubicación con el botón 📍 o escribe tu dirección.'; return; }
     save(LS_INFO, { name: $('fName').value.trim(), addr: $('fAddr').value.trim(), mode: mode });
     var num = String(TIENDA_WHATSAPP).replace(/\D/g, '');
     if (num.length === 10) num = '52' + num;
@@ -385,6 +424,8 @@
   $('closeCart').addEventListener('click', closeSheet);
   $('sheetBg').addEventListener('click', function(e){ if (e.target === this) closeSheet(); });
   $('send').addEventListener('click', send);
+  $('gpsBtn').addEventListener('click', getGps);
+  $('gpsClear').addEventListener('click', function(){ gps = null; $('gpsMsg').textContent = ''; paintGps(); });
   $('clearCart').addEventListener('click', function(){ if (confirm('¿Vaciar todo el pedido?')){ cart = {}; save(LS_CART, cart); closeSheet(); render(); } });
   $('kgCancel').addEventListener('click', function(){ $('kgBg').classList.add('hidden'); });
   $('kgOk').addEventListener('click', function(){ if (kgChoice) setQty(kgTarget, kgChoice); $('kgBg').classList.add('hidden'); });
