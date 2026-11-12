@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>La Pastora · Haz tu pedido</title>
-<meta name="theme-color" content="#6FA23C">
+<meta name="theme-color" content="#2A6BD1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="La Pastora">
@@ -12,9 +12,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Roboto:wght@400;500;700&display=swap">
 <style>
   :root{
-    --g7:#4F7A2A; --g6:#6FA23C; --g5:#7FB44A; --g1:#E9F2DE;
-    --ink:#20241D; --ink6:#5B6156; --ink4:#8B9184;
-    --s0:#FFFFFF; --s1:#EEF1E8; --s2:#F7F8F4; --line:#DEE3D6; --line2:#C6CDBB;
+    --g7:#1D4E9E; --g6:#2A6BD1; --g5:#4A8AE8; --g1:#E5EEFB;
+    --ink:#1B2230; --ink6:#556070; --ink4:#8792A2;
+    --s0:#FFFFFF; --s1:#EBF0F7; --s2:#F5F8FC; --line:#DAE2EE; --line2:#C2CEDF;
     --promo-bg:#fdecc8; --promo-ink:#8a5a00; --red:#E14A40;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -57,12 +57,12 @@
   .empty{text-align:center;color:var(--ink4);padding:50px 10px;}
   .foot{font-size:11.5px;color:var(--ink4);margin-top:24px;text-align:center;}
 
-  .cartbar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 14px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(238,241,232,0),var(--s1) 35%);}
-  .cartbar button{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:952px;margin:0 auto;border:0;border-radius:14px;background:var(--g7);color:#fff;padding:15px 18px;font-size:15.5px;font-weight:700;box-shadow:0 10px 30px rgba(32,36,29,.25);}
+  .cartbar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 14px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(235,240,247,0),var(--s1) 35%);}
+  .cartbar button{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:952px;margin:0 auto;border:0;border-radius:14px;background:var(--g7);color:#fff;padding:15px 18px;font-size:15.5px;font-weight:700;box-shadow:0 10px 30px rgba(20,30,50,.25);}
   .cartbar.hidden{display:none;}
   .pill{background:rgba(255,255,255,.2);border-radius:999px;padding:2px 9px;margin-right:8px;font-size:13px;}
 
-  .sheet-bg{position:fixed;inset:0;background:rgba(32,36,29,.45);z-index:30;display:flex;align-items:flex-end;justify-content:center;}
+  .sheet-bg{position:fixed;inset:0;background:rgba(20,30,50,.45);z-index:30;display:flex;align-items:flex-end;justify-content:center;}
   .sheet-bg.hidden{display:none;}
   .sheet{background:var(--s0);width:100%;max-width:620px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 18px;padding-bottom:max(18px,env(safe-area-inset-bottom));}
   .sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
@@ -96,7 +96,7 @@
   .gps-msg{font-size:12.5px;color:var(--ink6);margin-top:6px;}
   .clear{border:0;background:transparent;color:var(--ink4);font-size:13px;text-decoration:underline;margin-top:10px;width:100%;}
 
-  .kg-bg{position:fixed;inset:0;background:rgba(32,36,29,.45);z-index:40;display:flex;align-items:center;justify-content:center;padding:18px;}
+  .kg-bg{position:fixed;inset:0;background:rgba(20,30,50,.45);z-index:40;display:flex;align-items:center;justify-content:center;padding:18px;}
   .kg-bg.hidden{display:none;}
   .kg{background:var(--s0);border-radius:18px;padding:18px;width:100%;max-width:360px;}
   .kg h3{margin:0 0 2px;font-family:'Manrope',sans-serif;font-size:17px;}
