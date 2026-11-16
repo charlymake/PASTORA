@@ -26,6 +26,11 @@
   .brand{margin:0;line-height:0;}
   .brand img{display:block;height:130px;width:auto;max-width:100%;background:#fff;border-radius:14px;padding:8px 14px;box-shadow:0 4px 14px rgba(10,30,70,.18);}
   .tag{font-family:'Manrope',sans-serif;font-size:15px;font-weight:700;margin-top:12px;letter-spacing:.01em;}
+  .brands{margin-top:16px;}
+  .brands-t{font-family:'Manrope',sans-serif;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.9;margin-bottom:7px;}
+  .brands-row{display:flex;flex-wrap:wrap;gap:7px;}
+  .brands-row span{flex:0 0 auto;width:88px;height:46px;background:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 2px 8px rgba(10,30,70,.15);}
+  .brands-row img{max-width:100%;max-height:100%;object-fit:contain;display:block;}
   .status{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:999px;}
   .dot{width:7px;height:7px;border-radius:50%;background:#fff;}
   .dot.off{background:#ffd27a;}
@@ -110,6 +115,9 @@
   .btn-pri{background:var(--g6);color:#fff;}
 
   @media (max-width:520px){
+    .brands-row{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-18px;padding-right:18px;padding-bottom:2px;}
+    .brands-row::-webkit-scrollbar{display:none;}
+    .brands-row span{width:80px;height:42px;}
     .brand img{height:108px;padding:8px 14px;}
     .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
     .card{padding:10px;}
@@ -124,6 +132,10 @@
     <h1 class="brand"><img src="logo-pastora.png" alt="La Pastora · Quesos y jamones · De La Joya, Ver."></h1>
     <div class="tag">Quesos, lácteos y carnes frías</div>
     <div class="status"><span class="dot" id="dot"></span><span id="statusTxt">Cargando productos…</span></div>
+    <div class="brands">
+      <div class="brands-t">La Pastora, distribuidora de:</div>
+      <div class="brands-row"><span><img src="marcas/calvario.png" alt="El Calvario" loading="lazy"></span><span><img src="marcas/lala.png" alt="Lala" loading="lazy"></span><span><img src="marcas/bimbo.png" alt="Bimbo" loading="lazy"></span><span style="background:#0260DC"><img src="marcas/lapaz.png" alt="La Paz" loading="lazy"></span><span><img src="marcas/vaca.png" alt="Lácteos" loading="lazy"></span><span style="background:#D2E09A"><img src="marcas/gloria.png" alt="Mantequilla Gloria" loading="lazy"></span><span><img src="marcas/fud.png" alt="FUD" loading="lazy"></span><span><img src="marcas/viva.png" alt="Chimex Viva" loading="lazy"></span><span><img src="marcas/mccormick.png" alt="McCormick" loading="lazy"></span></div>
+    </div>
   </header>
 
   <div class="toolbar">
