@@ -209,6 +209,8 @@
   var SUPABASE_KEY = 'sb_publishable_4SQQGXBk-H3ZEyp-mkRBuQ_3Ws0dQmy';
   var REFRESH_MS = 60000;
   var KG_OPTIONS = [0.25, 0.5, 0.75, 1, 1.5, 2];
+  // orden de las categorías en la página (las que no estén aquí van al final)
+  var ORDEN_CATEGORIAS = ['lacteos', 'carnes', 'granos', 'desechables', 'abarrotes'];
   // ===============================
 
   var LS_DATA = 'pastora_cliente_catalogo', LS_CART = 'pastora_cliente_pedido', LS_INFO = 'pastora_cliente_datos';
@@ -239,7 +241,11 @@
   // ---------- datos ----------
   function setData(d){
     // productos por kilo con menos de 1/4 kg son sobrantes: no se ofrecen a clientes
-    data = { categories: d.categories || [], products: (d.products || []).map(function(p){ p.price = +p.price; p.max = +p.max; return p; })
+    var cats = (d.categories || []).slice().sort(function(a, b){
+      var ia = ORDEN_CATEGORIAS.indexOf(a.key), ib = ORDEN_CATEGORIAS.indexOf(b.key);
+      return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+    });
+    data = { categories: cats, products: (d.products || []).map(function(p){ p.price = +p.price; p.max = +p.max; return p; })
       .filter(function(p){ return !(isKg(p) && p.max > 0 && p.max < KG_OPTIONS[0]); }) };
     byId = {}; data.products.forEach(function(p){ byId[p.id] = p; });
     // ajusta el pedido a lo que sigue disponible
