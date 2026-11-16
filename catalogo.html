@@ -210,6 +210,19 @@
   var SUPABASE_KEY = 'sb_publishable_4SQQGXBk-H3ZEyp-mkRBuQ_3Ws0dQmy';
   var REFRESH_MS = 60000;
   var KG_OPTIONS = [0.25, 0.5, 0.75, 1, 1.5, 2];
+  // productos que NO se muestran a clientes (siguen en el inventario y se venden normal en caja)
+  var OCULTAR_IDS = [
+    'c55',  // CHEETOS
+    'c48',  // BOING
+    'c26',  // BARCEL RUNNERS
+    'c57',  // CHURRUMAIS
+    'c21',  // BARCEL CHIPS
+    'c64',  // CRUJITOS
+    'c141', // RANCHERITOS
+    'c20',  // BARCEL CHIPOTLES
+    'c22',  // BARCEL GOLDEN NUTS
+    'fa108ade-38c5-4f2b-a46d-e1eae21df22d' // GAMESA GIRO
+  ];
   // orden de las categorías en la página (las que no estén aquí van al final)
   var ORDEN_CATEGORIAS = ['lacteos', 'carnes', 'granos', 'desechables', 'abarrotes'];
   // ===============================
@@ -247,7 +260,7 @@
       return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
     });
     data = { categories: cats, products: (d.products || []).map(function(p){ p.price = +p.price; p.max = +p.max; return p; })
-      .filter(function(p){ return !(isKg(p) && p.max > 0 && p.max < KG_OPTIONS[0]); }) };
+      .filter(function(p){ return OCULTAR_IDS.indexOf(p.id) === -1 && !(isKg(p) && p.max > 0 && p.max < KG_OPTIONS[0]); }) };
     byId = {}; data.products.forEach(function(p){ byId[p.id] = p; });
     // ajusta el pedido a lo que sigue disponible
     Object.keys(cart).forEach(function(id){
