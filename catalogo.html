@@ -56,6 +56,7 @@
   .price{font-family:'Manrope',sans-serif;font-size:19px;font-weight:800;color:var(--g7);}
   .price small{font-size:12px;color:var(--ink6);font-weight:700;}
   .badge{align-self:flex-start;padding:2px 8px;border-radius:999px;background:var(--promo-bg);color:var(--promo-ink);font-family:'Manrope',sans-serif;font-size:11px;font-weight:800;}
+  .badge.sp{background:var(--g1);color:var(--g7);}
   .spacer{flex:1;}
   .add{border:0;background:var(--g6);color:#fff;border-radius:10px;padding:9px 0;font-weight:700;font-size:14px;width:100%;}
   .stepper{display:flex;align-items:center;justify-content:space-between;background:var(--s0);border:1px solid var(--line2);border-radius:10px;overflow:hidden;}
@@ -223,6 +224,10 @@
     'c22',  // BARCEL GOLDEN NUTS
     'fa108ade-38c5-4f2b-a46d-e1eae21df22d' // GAMESA GIRO
   ];
+  // productos que SÍ se muestran aunque no tengan existencias (salen como "Sobre pedido")
+  var SIEMPRE_IDS = [
+    '8965affc-cdbd-4d70-9ce3-df8137cbf7dc' // JAMON AHUMADO PAVO
+  ];
   // orden de las categorías en la página (las que no estén aquí van al final)
   var ORDEN_CATEGORIAS = ['lacteos', 'carnes', 'granos', 'desechables', 'abarrotes'];
   // ===============================
@@ -275,7 +280,7 @@
     return fetch(SUPABASE_URL + '/rest/v1/rpc/lilo_catalogo_publico', {
       method: 'POST',
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
-      body: '{}'
+      body: JSON.stringify({ incluir: SIEMPRE_IDS })
     }).then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function(d){
         setData(d); save(LS_DATA, d);
@@ -329,6 +334,7 @@
               '<div class="name">' + esc(p.name) + '</div>' +
               '<div class="price">' + money(p.price) + (isKg(p) ? ' <small>/kg</small>' : '') + '</div>' +
               (hasPromo(p) ? '<span class="badge">Oferta ' + esc(promoLabel(p)) + '</span>' : '') +
+              (!(p.max > 0) ? '<span class="badge sp">Sobre pedido</span>' : '') +
               '<div class="spacer"></div>' + controlsHtml(p) +
             '</div>';
           }).join('') + '</div></section>';
@@ -390,7 +396,7 @@
     var items = cartItems();
     var name = $('fName').value.trim(), addr = $('fAddr').value.trim(), note = $('fNote').value.trim();
     var L = ['¡Hola ' + TIENDA_NOMBRE + '! Quiero hacer un pedido:', ''];
-    items.forEach(function(it){ L.push('• ' + qtyLabel(it.p, it.q) + ' — ' + it.p.name + ' (' + money(lineTotal(it.p, it.q)) + ')'); });
+    items.forEach(function(it){ L.push('• ' + qtyLabel(it.p, it.q) + ' — ' + it.p.name + ' (' + money(lineTotal(it.p, it.q)) + ')' + (!(it.p.max > 0) ? ' [sobre pedido]' : '')); });
     L.push('', '*Total aproximado: ' + money(cartTotal()) + '*', '');
     L.push('Nombre: ' + name);
     if (mode === 'domicilio'){
