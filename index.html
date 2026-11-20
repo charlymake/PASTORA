@@ -2961,13 +2961,22 @@ if(xr(e,"index.xml"))throw new Error("Unsupported NUMBERS 09 file");throw new Er
   // gracias a archiveTodayToHistory) y la caja queda cerrada, lista para "Abrir caja"
   // con el fondo de hoy, igual que cualquier otro día. Así "Ventas de hoy" nunca vuelve
   // a arrastrar lo de un día que nadie cerró a tiempo.
+  // IMPORTANTE: solo se archivan las ventas de días ANTERIORES. Las de hoy se quedan en
+  // la caja abierta y la caja NO se cierra si ya hubo ventas hoy — antes, si un aparato
+  // traía ventas viejas al sincronizar a media mañana, se cerraba la caja a mitad del
+  // día y se llevaba al historial también lo vendido hoy, y el corte ya no cuadraba
+  // con "Ventas de hoy". La caja solo se cierra a mano con "Cerrar caja".
   function autoCloseCajaIfStale(){
-    if (!cajaAbierta) return false; // ya está cerrada, no hay nada que hacer
     var todayKey = todayISO();
-    var hasOldSales = salesLog.some(function(sale){ return dateKeyFromDate(sale.time) !== todayKey; });
-    if (!hasOldSales) return false; // todo lo que hay en curso ya es de hoy
-    archiveTodayToHistory();
-    cajaAbierta = false;
+    var oldSales = salesLog.filter(function(sale){ return dateKeyFromDate(sale.time) !== todayKey; });
+    if (!oldSales.length) return false; // todo lo que hay en curso ya es de hoy
+    var todaySales = salesLog.filter(function(sale){ return dateKeyFromDate(sale.time) === todayKey; });
+    var wasOpen = cajaAbierta;
+    salesLog = oldSales;
+    archiveTodayToHistory();           // archiva solo lo de días anteriores, en su fecha real
+    salesLog = todaySales;             // lo de hoy sigue en la caja abierta
+    salesTotal = salesLog.reduce(function(sum, s){ return sum + (s.total || 0); }, 0);
+    if (wasOpen && !todaySales.length) cajaAbierta = false; // día nuevo sin ventas: pedir fondo
     return true;
   }
 
@@ -5531,6 +5540,11 @@ if(xr(e,"index.xml"))throw new Error("Unsupported NUMBERS 09 file");throw new Er
       categories: stripDeleted(deleted.categories, unionById('key', local.categories, remote.categories, preferRemote), 'key'),
       deleted: deleted
     };
+    // Una venta que ya está en el historial (porque otro aparato ya cerró caja) no debe
+    // regresar a la caja abierta solo porque un aparato atrasado todavía la tenía.
+    var archivedIds = {};
+    merged.history.forEach(function(h){ (h.sales || []).forEach(function(s){ archivedIds[s.id] = true; }); });
+    merged.salesLog = merged.salesLog.filter(function(s){ return !archivedIds[s.id]; });
     merged.salesTotal = merged.salesLog.reduce(function(sum, s){ return sum + (s.total || 0); }, 0);
     merged.updatedAtMs = Math.max(localMs || 0, remoteMs || 0);
     return merged;
